@@ -74,6 +74,7 @@ public class LocalSettingsService : ILocalSettingsService
     {
         if (RuntimeHelper.IsMSIX)
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             ApplicationData.Current.LocalSettings.Values[key] = await Json.StringifyAsync(value);
         }
         else
@@ -81,7 +82,7 @@ public class LocalSettingsService : ILocalSettingsService
             await InitializeAsync();
 
             _settings[key] = await Json.StringifyAsync(value);
-
+#pragma warning restore CS8604 // Possible null reference argument.
             await Task.Run(() => _fileService.Save(_applicationDataFolder, _localsettingsFile, _settings));
         }
     }

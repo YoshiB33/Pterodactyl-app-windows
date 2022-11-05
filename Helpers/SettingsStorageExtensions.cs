@@ -19,7 +19,9 @@ public static class SettingsStorageExtensions
     public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
     {
         var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
+#pragma warning disable CS8604 // Possible null reference argument.
         var fileContent = await Json.StringifyAsync(content);
+#pragma warning restore CS8604 // Possible null reference argument.
 
         await FileIO.WriteTextAsync(file, fileContent);
     }
@@ -39,7 +41,9 @@ public static class SettingsStorageExtensions
 
     public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         settings.SaveString(key, await Json.StringifyAsync(value));
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 
     public static void SaveString(this ApplicationDataContainer settings, string key, string value)

@@ -14,6 +14,7 @@ public class FileService : IFileService
         if (File.Exists(path))
         {
             var json = File.ReadAllText(path);
+#pragma warning disable CS8603 // Possible null reference return.
             return JsonConvert.DeserializeObject<T>(json);
         }
 
@@ -39,3 +40,4 @@ public class FileService : IFileService
         }
     }
 }
+#pragma warning restore CS8603 // Possible null reference return.

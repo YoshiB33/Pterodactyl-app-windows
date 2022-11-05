@@ -8,7 +8,9 @@ public static class Json
     {
         return await Task.Run<T>(() =>
         {
+#pragma warning disable CS8603 // Possible null reference return.
             return JsonConvert.DeserializeObject<T>(value);
+#pragma warning restore CS8603 // Possible null reference return.
         });
     }
 
