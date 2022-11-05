@@ -33,7 +33,7 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            var response = await APIService.Client.GetAsync("https://server.yoshib.se/api/client");
+            var response = await APIService.Client.GetAsync($"https://{ViewModel.GetServerURL()}/api/client");
 
             if (response.IsSuccessStatusCode)
             {
