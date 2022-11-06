@@ -1,10 +1,16 @@
-﻿using System.Text.Json;
-using Microsoft.UI;
+﻿using System.Net.WebSockets;
+using System.Text.Json;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Pterodactyl_app.Services;
 using Pterodactyl_app.ViewModels;
+using Pterodactyl_app.core.Helpers;
+using Pterodactyl_app.Models.AuthenticateWebsocket;
+using System.Net.Sockets;
+using System.Text;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
+using Microsoft.UI;
 
 namespace Pterodactyl_app.Views;
 
@@ -20,40 +26,75 @@ public sealed partial class ServerPage : Page
         ViewModel = App.GetService<ServerViewModel>();
         InitializeComponent();
     }
+    public static Stream GenerateStreamFromString(string s)
+    {
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream);
+        writer.Write(s);
+        writer.Flush();
+        stream.Position = 0;
+        return stream;
+    }
 
     private async void AfterData(Models.ListAPIModel.Attributes data)
     {
+        string convertBuffer;
         try
         {
-            var response = await APIService.Client.GetAsync($"{ViewModel.ServerURL()}/api/client/servers/{data.uuid}/resources");
-            var json = await JsonSerializer.DeserializeAsync<Models.ResourcesAPIModel.Rootobject>(response.Content.ReadAsStream());
-            if (json is not null && json.attributes is not null)
+            var apiToWebsocket = await APIService.Client.GetAsync($"https://{APIService.GetServerURL()}/api/client/servers/{data.uuid}/websocket");
+            if (apiToWebsocket.IsSuccessStatusCode)
             {
-                if (json.attributes.current_state == "offline")
+                var websocketCredentials = await JsonSerializer.DeserializeAsync<Models.EstablishWebsocket.Rootobject>(apiToWebsocket.Content.ReadAsStream());
+                if (websocketCredentials is not null)
                 {
-                    StatusBox.Text = "Offline";
+                    do
+                    {
+                        var Socket = new ClientWebSocket();
+                        await Socket.ConnectAsync(new Uri(websocketCredentials.data.socket), CancellationToken.None);
+                        var Token = websocketCredentials.data.token;
+                        var sendToWebSocket = new Rootobject
+                        {
+                            Event = "auth",
+                            Args = new string[] { websocketCredentials.data.token },
+                        };
+                        var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                        var authJson = JsonSerializer.Serialize(sendToWebSocket, jsonOptions);
+                        await Websocket.Send(Socket, authJson);
+                        var buffer = new ArraySegment<byte>(new byte[2048]);
+                        do
+                        {
+                            WebSocketReceiveResult result;
+                            using var ms = new MemoryStream();
+                            do
+                            {
+                                result = await Socket.ReceiveAsync(buffer, CancellationToken.None);
+#pragma warning disable CS8604 // Possible null reference argument.
+                                ms.Write(buffer.Array, buffer.Offset, result.Count);
+#pragma warning restore CS8604 // Possible null reference argument.
+                            } while (!result.EndOfMessage);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                break;
+                            }
+
+                            ms.Seek(0, SeekOrigin.Begin);
+                            using var reader = new StreamReader(ms, Encoding.UTF8);
+                            convertBuffer = await reader.ReadToEndAsync();
+                            var FormatedMessage = JsonSerializer.Deserialize<Models.WebSocketModel.Rootobject>(convertBuffer);
+                            LogBox.Text += convertBuffer;
+                        } while (true);
+                    } while (true);
                 }
-                if (json.attributes.current_state == "stopping")
-                {
-                    StatusBox.Text = "Stopping";
-                    AfterData(data);
-                }
-                if (json.attributes.current_state == "starting")
-                {
-                    StatusBox.Text = "Starting";
-                    StatusBox.Foreground = new SolidColorBrush(Colors.Yellow);
-                    AfterData(data);
-                }
-                if (json.attributes.current_state == "running")
-                {
-                    StatusBox.Text = "Online";
-                    StatusBox.Foreground = new SolidColorBrush(Colors.Green);
-                }
+            }
+            else
+            {
+                NameBox.Text += apiToWebsocket.ToString();
             }
         }
         catch (Exception ex)
         {
-            NameBox.Text += $"{ex.Message} {ViewModel.ServerURL()}/api/client/servers/{data.uuid}/resources";
+            NameBox.Text += $"{ex.Message} {ViewModel.ServerURL()}/api/client/servers/{data.uuid}/websocket";
         }
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
