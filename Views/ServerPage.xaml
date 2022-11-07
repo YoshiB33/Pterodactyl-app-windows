@@ -61,7 +61,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <ScrollViewer VerticalScrollMode="Enabled" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Visible" Grid.RowSpan="13">
+                <ScrollViewer VerticalScrollMode="Auto" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto" Grid.RowSpan="13" >
                     <TextBlock TextWrapping="Wrap" CanBeScrollAnchor="True" x:Name="LogBox"/>
                 </ScrollViewer>
                 <TextBox Grid.Row="14"/>
