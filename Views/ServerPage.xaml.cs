@@ -129,6 +129,19 @@ public sealed partial class ServerPage : Page
                                         break;
                                     case "stats":
                                         break;
+                                    case "install output":
+                                        foreach (var item in FormatedMessage.args)
+                                        {
+                                            if (item.EndsWith("[m"))
+                                            {
+                                                LogBox.Text += $"{item.Substring(0, item.Length - 2)}\n";
+                                            }
+                                            else
+                                            {
+                                                LogBox.Text += $"{item}\n";
+                                            }
+                                        }
+                                        break;
                                     default:
                                         LogBox.Text += $"No match {FormatedMessage.@event}\n";
                                         break;
@@ -158,4 +171,6 @@ public sealed partial class ServerPage : Page
         }
         base.OnNavigatedTo(e);
     }
+
+
 }
