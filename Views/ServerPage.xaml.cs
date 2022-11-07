@@ -25,11 +25,6 @@ public sealed partial class ServerPage : Page
         InitializeComponent();
     }
 
-    //readonly JsonSerializerOptions DeserializeOptions = new()
-    //{
-    //    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    //    PropertyNameCaseInsensitive = true,
-    //};
 
     private async void AfterData(Models.ListAPIModel.Attributes data)
     {
