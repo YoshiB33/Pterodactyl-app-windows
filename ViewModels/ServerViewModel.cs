@@ -124,6 +124,7 @@ public class ServerViewModel : ObservableRecipient
                                         var newApiToWebsocket = await APIService.Client.GetAsync($"https://{ServerURL()}/api/client/servers/{data.uuid}/websocket");
                                         if (apiToWebsocket.IsSuccessStatusCode)
                                         {
+                                            LogBox.Text += "Token expiring!\n";
                                             var newWebsocketCredentials = await JsonSerializer.DeserializeAsync<Models.EstablishWebsocket.Rootobject>(newApiToWebsocket.Content.ReadAsStream());
                                             if (newWebsocketCredentials is not null)
                                             {
@@ -134,10 +135,12 @@ public class ServerViewModel : ObservableRecipient
                                                 };
                                                 var newAuthJson = JsonSerializer.Serialize(newSendToWebsocket);
                                                 await Websocket.Send(Socket, newAuthJson);
+                                                LogBox.Text += "Authenticated successfully!\n";
                                             }
                                         }
                                         break;
                                     case "token expired":
+                                        LogBox.Text += "Token expired!\n";
                                         AfterData(data, LogBox, StatusBox, NameBox);
                                         break;
                                     case "auth success":
