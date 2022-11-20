@@ -17,14 +17,12 @@ public sealed partial class SettingsPage : Page
     {
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
-        ServerAdress.Document.SetText(Microsoft.UI.Text.TextSetOptions.None, ViewModel.GetServerURL());
+        ServerAdress.Text = ViewModel.GetServerURL();
     }
 
-    private string? ServerURL;
-    private void RichEditBox_TextChanged(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void AddressChanged(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        ServerAdress.Document.GetText(Microsoft.UI.Text.TextGetOptions.AdjustCrlf, out ServerURL);
-        localSettings.Values["ServerURL"] = ServerURL;
+        localSettings.Values["ServerURL"] = ServerAdress.Text;
     }
 
     private string? ServerKey;

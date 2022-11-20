@@ -54,7 +54,7 @@
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
                 <TextBlock x:Uid="Settings_ServerCredentials" Style="{ThemeResource SubtitleTextBlockStyle}"/>
                 <TextBlock x:Uid="Settings_ServerAdressBox" Margin="{StaticResource SmallTopMargin}"/>
-                <RichEditBox x:Name="ServerAdress" Margin="{StaticResource XSmallTopMargin}" TextChanged="RichEditBox_TextChanged"/>
+                <TextBox x:Name="ServerAdress" Margin="{StaticResource XSmallTopMargin}" TextChanged="AddressChanged"/>
                 <PasswordBox x:Uid="Settings_ServerKeyBox" x:Name="ServerKeyBox" Margin="{StaticResource SmallTopMargin}" PasswordChanged="PasswordBox_PasswordChanged" Password="{x:Bind ViewModel.GetServerKey()}"/>
             </StackPanel>
 
